@@ -6,7 +6,7 @@ using Sitecore.SecurityModel;
 using System;
 using System.Linq;
 
-namespace Sitecore.Buckets.Pipelines.BucketOperations.SyncBucket.RunSyncProcess
+namespace Sitecore.Support.Buckets.Pipelines.BucketOperations.SyncBucket
 {
   public class RunSyncProcess : SyncBucketProcessor
   {
@@ -50,7 +50,8 @@ namespace Sitecore.Buckets.Pipelines.BucketOperations.SyncBucket.RunSyncProcess
       }
       if (ShouldMoveToDateFolder(current))
       {
-        if (!IsAlreadyOnItsPlace(current, GetDestinationFolderPath(root, current.Statistics.Created, current)))
+        //if (!IsAlreadyOnItsPlace(current, GetDestinationFolderPath(root, current.Statistics.Created, current)))
+        if (!IsAlreadyOnItsPlace(current, GetDestinationFolderPath(root, current.Created, current)))
         {
           MoveSingleItemToDynamicFolder(root, current);
         }
@@ -70,9 +71,19 @@ namespace Sitecore.Buckets.Pipelines.BucketOperations.SyncBucket.RunSyncProcess
     {
       if (!ShouldDeleteInCreationOfBucket(item) && !item.IsItemBucketable())
       {
-        return !item.Parent.IsLockedChildRelationship();
+        //return !item.Parent.IsLockedChildRelationship();
+        return !IsLockedChildRelationship(item.Parent);
       }
       return false;
+    }
+
+    internal static bool IsLockedChildRelationship(Item item)
+    {
+      if (item != null && item.Fields[Sitecore.Buckets.Util.Constants.ShouldNotOrganizeInBucket] != null)
+      {
+        return item.Fields[Sitecore.Buckets.Util.Constants.ShouldNotOrganizeInBucket].Value == "1";
+      }
+      return true;
     }
   }
 }
